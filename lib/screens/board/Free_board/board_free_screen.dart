@@ -1,0 +1,75 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:untitled2/screens/board/Free_board/board_write.dart';
+import 'board_free_detail.dart';
+
+class free_screen extends StatelessWidget{
+  const free_screen({super.key});
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null) return '';
+    DateTime dateTime = (timestamp as Timestamp).toDate();
+    return '${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')}';
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('boards')
+              .orderBy('timestamp',descending: true)
+              .snapshots(),
+          builder:(context,snapshots){
+            if(snapshots.hasError){
+              return Center(child: Text('에러 발생'),);
+            }
+            if(snapshots.connectionState == ConnectionState.waiting){
+              return Center(child: CircularProgressIndicator(),);
+            }
+            final docs = snapshots.data!.docs;
+
+            return ListView.builder(
+              itemCount: docs.length,
+              itemBuilder: (context,index){
+                final data = docs[index].data() as Map<String,dynamic>;
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 12,vertical: 6),
+                  child: ListTile(
+                  title: Text(data['title'] ?? '제목 없음',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        data['content'] ?? '내용 없음',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4,),
+                      Text('${_formatTimestamp(data['timestamp'])}/${data['userName']??'오류'}')
+                    ],
+                  ),
+                    onTap:(){
+                    Navigator.push(context,
+                        MaterialPageRoute(
+                            builder: (_)=>free_detail(postId:docs[index].id)
+                        )
+                    );
+                    },
+                  ),
+                );
+              },
+            );
+          }
+      ),
+            floatingActionButton: FloatingActionButton(onPressed:(){
+              Navigator.push(context,
+              MaterialPageRoute(builder: (_)=> WritePage()));
+            },
+            child: Icon(Icons.add),),
+    );
+  }
+}

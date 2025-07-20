@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "719019166826",
+    "project_id": "reroll-a2a74",
+    "storage_bucket": "reroll-a2a74.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719019166826:android:abf8a61007932d0b650e13",
+        "android_client_info": {
+          "package_name": "com.example.untitled2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDu1afXFpMcCOFBkNS25SWBx4osRp86-Pw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
