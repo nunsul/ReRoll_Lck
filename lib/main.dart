@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled2/firebase_options.dart';
 import 'package:untitled2/screens/home/home_screen.dart';
-
+//필요없는 주석
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
