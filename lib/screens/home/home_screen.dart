@@ -21,7 +21,7 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
     Center(child: Text('홈'),),
     Center(child: Text('경기정보'),),
     BoardMain(),
-    Center(child: Text('채팅'),),
+    Center(child: Text('채팅입니다'),),
     Center(child: Text('승부예측'),),
 
   ];
@@ -40,7 +40,8 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
         ],
       ),
       body: pages[selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(currentIndex:selectedIndex,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex:selectedIndex,
       onTap: (int index){
         setState(() {
           selectedIndex = index;

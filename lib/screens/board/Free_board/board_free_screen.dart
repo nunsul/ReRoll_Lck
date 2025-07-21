@@ -55,7 +55,7 @@ class free_screen extends StatelessWidget{
                     onTap:(){
                     Navigator.push(context,
                         MaterialPageRoute(
-                            builder: (_)=>free_detail(postId:docs[index].id)
+                            builder: (_)=>FreeDetail(postId:docs[index].id)
                         )
                     );
                     },
