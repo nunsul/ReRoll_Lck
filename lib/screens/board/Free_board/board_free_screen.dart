@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled2/screens/board/Free_board/board_write.dart';
+import 'package:untitled2/widgets/widgets.dart';
 import 'board_free_detail.dart';
 
 class free_screen extends StatelessWidget{
@@ -49,7 +50,7 @@ class free_screen extends StatelessWidget{
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4,),
-                      Text('${_formatTimestamp(data['timestamp'])}/${data['userName']??'오류'}')
+                      Text('${FormatTimestamp(data['timestamp'])}/${data['userName']??'오류'}')
                     ],
                   ),
                     onTap:(){

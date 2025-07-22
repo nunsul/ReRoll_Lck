@@ -3,16 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled2/models/models_post.dart';
 import 'package:untitled2/widgets/widgets.dart';
 
-class FreeDetail extends StatefulWidget {
+class teamboard_detail extends StatefulWidget {
   final String postId;
 
-  const FreeDetail({required this.postId,super.key});
+  const teamboard_detail({required this.postId,super.key});
 
   @override
-  State<FreeDetail> createState() => _FreeDetailState();
+  State<teamboard_detail> createState() => _teamboard_detailState();
 }
 
-class _FreeDetailState extends State<FreeDetail> {
+class _teamboard_detailState extends State<teamboard_detail> {
   final TextEditingController _commentsController = TextEditingController();
 
   @override
@@ -27,7 +27,7 @@ class _FreeDetailState extends State<FreeDetail> {
       appBar: AppBar(title: Text('자유 게시판')),
       body: FutureBuilder<DocumentSnapshot>(
         future: FirebaseFirestore.instance
-            .collection('boards')
+            .collection('team_board')
             .doc(widget.postId)
             .get(),
         builder: (context, snapshot) {
@@ -85,7 +85,7 @@ class _FreeDetailState extends State<FreeDetail> {
               // 댓글 영역
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
-                    .collection('boards')
+                    .collection('team_board')
                     .doc(widget.postId)
                     .collection('comments')
                     .orderBy('timestamp', descending: true)
@@ -158,7 +158,7 @@ class _FreeDetailState extends State<FreeDetail> {
                   );
 
                   await FirebaseFirestore.instance
-                      .collection("boards")
+                      .collection("team_board")
                       .doc(widget.postId)
                       .collection('comments')
                       .add(comment.toJson());
