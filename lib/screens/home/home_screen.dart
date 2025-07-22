@@ -1,6 +1,7 @@
 import '../board/board_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../login/login_main_screen.dart';
 
 class RerollMain extends StatelessWidget{
   @override
@@ -34,7 +35,9 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
         actions: [
           IconButton(
               onPressed:(){
-                
+                Navigator.push(context,
+                  MaterialPageRoute(
+                      builder:(_)=> login_main()));
               },
               icon: Icon(Icons.account_box))
         ],
