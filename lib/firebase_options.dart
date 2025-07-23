@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
     appId: '1:719019166826:android:abf8a61007932d0b650e13',
     messagingSenderId: '719019166826',
     projectId: 'reroll-a2a74',
-    storageBucket: 'reroll-a2a74.firebasestorage.app',
+    storageBucket: 'reroll-a2a74.appspot.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

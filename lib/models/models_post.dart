@@ -81,6 +81,41 @@ class Comments {
       'timestamp' : timestamp
     };
   }
-
 }
+class users {
+  final String userdocid;
+  final String imageUrls;
+  final String userName;
+  final DateTime timestamp;
+  final String userId;
+
+  users({
+    required this.userdocid,
+    required this.imageUrls,
+    required this.userName,
+    required this.timestamp,
+    required this.userId,
+  });
+
+  factory users.fromJson(Map<String,dynamic> json,String docId){
+    return users(
+        userdocid: docId,
+        imageUrls: json['imageUrls']??'',
+        userName: json['userName']??'',
+        timestamp: (json['timestamp'] as Timestamp).toDate(),
+        userId: json['userId']??'',
+    );
+  }
+
+  Map<String,dynamic> toJson(){
+    return {
+      'imageUrls' : imageUrls,
+      'userName' : userName,
+      'timestamp' : timestamp,
+      'userId' : userId,
+    };
+  }
+}
+
+
 
