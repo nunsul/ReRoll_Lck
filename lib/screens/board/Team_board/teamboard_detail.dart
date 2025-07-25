@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled2/models/models_post.dart';
@@ -88,7 +89,7 @@ class _teamboard_detailState extends State<teamboard_detail> {
                     .collection('team_board')
                     .doc(widget.postId)
                     .collection('comments')
-                    .orderBy('timestamp', descending: true)
+                    .orderBy('timestamp', descending: false)
                     .snapshots(),
                 builder: (context, snapshots) {
                   if (!snapshots.hasData || snapshots.data!.docs.isEmpty) {
@@ -148,6 +149,10 @@ class _teamboard_detailState extends State<teamboard_detail> {
                     );
                     return;
                   }
+    if (FirebaseAuth.instance.currentUser == null) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:
+    Text("로그인 후 댓글을 작성할 수 있습니다")));
+    return;}
 
                   final comment = Comments(
                     id: "",

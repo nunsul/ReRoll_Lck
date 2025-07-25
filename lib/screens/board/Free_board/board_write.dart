@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled2/models/models_post.dart';
 
@@ -24,7 +25,7 @@ class _WritePageState extends State<WritePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('글 쓰기')),
-      resizeToAvoidBottomInset: true, // 키보드 올라올 때 자동으로 body 줄이기
+      resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -61,29 +62,49 @@ class _WritePageState extends State<WritePage> {
                   return;
                 }
 
-                final posts = Boards(
-                  id: '',
-                  title: title,
-                  content: content,
-                  imageUrls: [],
-                  userId: 'abv',
-                  userName: 'abc',
-                  timestamp: DateTime.now(),
-                );
+                try {
+                  // ✅ 로그인된 유저 확인
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('로그인이 필요합니다')),
+                    );
+                    return;
+                  }
 
-                await FirebaseFirestore.instance
-                    .collection('boards')
-                    .add(posts.toJson());
+                  // ✅ Firestore에서 닉네임 가져오기
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .get();
+                  final userName = userDoc['userName'] ?? '익명';
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('저장 완료!'),
-                    duration: Duration(milliseconds: 800),
-                  ),
-                );
+                  final post = Boards(
+                    id: '',
+                    title: title,
+                    content: content,
+                    imageUrls: [],
+                    userId: user.uid,
+                    userName: userName,
+                    timestamp: DateTime.now(),
+                  );
 
-                await Future.delayed(const Duration(milliseconds: 800));
-                Navigator.pop(context);
+                  await FirebaseFirestore.instance
+                      .collection('boards')
+                      .add(post.toJson());
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('저장 완료!')),
+                  );
+
+                  await Future.delayed(const Duration(milliseconds: 800));
+                  Navigator.pop(context);
+                } catch (e) {
+                  print('[ERROR] 글 저장 실패: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('오류가 발생했습니다')),
+                  );
+                }
               },
               child: const Text('등록'),
             ),

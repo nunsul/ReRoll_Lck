@@ -29,6 +29,16 @@ class free_screen extends StatelessWidget{
             }
             final docs = snapshots.data!.docs;
 
+            if (docs.isEmpty) {
+              return Center(
+                child: Text(
+                  '아직 게시글이 없습니다.\n첫 글을 작성해보세요!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+              );
+            }
+
             return ListView.builder(
               itemCount: docs.length,
               itemBuilder: (context,index){

@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../board/board_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../login/login_main_screen.dart';
+import 'mypage_screen.dart';
 
 class RerollMain extends StatelessWidget{
   @override
@@ -33,13 +36,22 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
       appBar: AppBar(title: Text('ReRoll',
         style: TextStyle(fontSize: 18,color: Colors.black),),
         actions: [
-          IconButton(
-              onPressed:(){
-                Navigator.push(context,
-                  MaterialPageRoute(
-                      builder:(_)=> login_main()));
-              },
-              icon: Icon(Icons.account_box))
+          StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder:(context,snap){
+                final user = snap.data;
+                if(user==null){
+                  return IconButton(onPressed:(){
+                    Navigator.push(context,
+                        MaterialPageRoute(builder:(_)=>login_main()));
+                  },icon: Icon(Icons.account_box));
+                }else {
+                  return IconButton(onPressed: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => mypage_screen()));
+                  }, icon: Icon(Icons.accessibility_new_rounded));
+                }
+              })
         ],
       ),
       body: pages[selectedIndex],

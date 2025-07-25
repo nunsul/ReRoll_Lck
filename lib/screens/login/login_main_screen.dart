@@ -78,10 +78,10 @@ class _login_mainState extends State<login_main>{
                  ),
                  SizedBox(width: 30,),
                  GestureDetector(
-                   onTap: (){/*
+                   onTap: (){
                      Navigator.push(context,
-                         MaterialPageRoute(builder: (_)=>findidorpw_screen()));*/
-                   },child: Text('아이디/비밀번호 찾기'),
+                         MaterialPageRoute(builder: (_)=>findidorpw_screen()));
+                   },child: Text('비밀번호 찾기'),
                  ),
                ], 
               ),
