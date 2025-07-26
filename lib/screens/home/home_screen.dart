@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:untitled2/screens/home/real_home_screen.dart';
 
+import '../../chat/chat_main_screen.dart';
 import '../board/board_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,7 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
     real_home_screen(),
     Center(child: Text('경기정보'),),
     BoardMain(),
-    Center(child: Text('채팅입니다'),),
+    chat_main_screen(),
     Center(child: Text('승부예측'),),
 
   ];
@@ -85,8 +86,6 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
           BottomNavigationBarItem(icon: Icon(Icons.batch_prediction_sharp),
           label: '승부예측'
           ),
-
-
         ],
       ),
     );
