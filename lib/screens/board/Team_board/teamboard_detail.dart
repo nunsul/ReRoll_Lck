@@ -1,13 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/models/models_post.dart';
 import 'package:untitled2/widgets/widgets.dart';
 
 class teamboard_detail extends StatefulWidget {
   final String postId;
 
-  const teamboard_detail({required this.postId,super.key});
+  const teamboard_detail({required this.postId, super.key});
 
   @override
   State<teamboard_detail> createState() => _teamboard_detailState();
@@ -15,6 +16,14 @@ class teamboard_detail extends StatefulWidget {
 
 class _teamboard_detailState extends State<teamboard_detail> {
   final TextEditingController _commentsController = TextEditingController();
+  late Future<DocumentSnapshot> _postFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postFuture = _fetchPost();
+    _increaseViewCount(widget.postId);
+  }
 
   @override
   void dispose() {
@@ -22,19 +31,39 @@ class _teamboard_detailState extends State<teamboard_detail> {
     super.dispose();
   }
 
+  Future<DocumentSnapshot> _fetchPost() {
+    return FirebaseFirestore.instance
+        .collection('team_board')
+        .doc(widget.postId)
+        .get();
+  }
+
+  Future<void> _increaseViewCount(String postId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final now = DateTime.now();
+    final todayKey = "viewed_$postId";
+    final lastViewed = prefs.getString(todayKey);
+    final today = "${now.year}-${now.month}-${now.day}";
+
+    if (lastViewed == today) return;
+
+    try {
+      final docRef =
+      FirebaseFirestore.instance.collection('team_board').doc(postId);
+      await docRef.update({'views': FieldValue.increment(1)});
+      await prefs.setString(todayKey, today);
+    } catch (e) {
+      print("조회수 증가 실패: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('자유 게시판')),
+      appBar: AppBar(title: Text('팀 게시판')),
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('team_board')
-            .doc(widget.postId)
-            .get(),
+        future: _postFuture,
         builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('오류'));
-          }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
@@ -47,7 +76,7 @@ class _teamboard_detailState extends State<teamboard_detail> {
           return ListView(
             padding: const EdgeInsets.all(25),
             children: [
-              // 게시글 상단 정보 카드
+              // 📌 게시글 본문
               Card(
                 margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Padding(
@@ -58,7 +87,6 @@ class _teamboard_detailState extends State<teamboard_detail> {
                       Container(
                         width: 60,
                         height: 60,
-                        //나중에 진짜 이미지로 변경 예정
                         color: Colors.grey[500],
                         child: Icon(Icons.image, size: 30),
                       ),
@@ -70,6 +98,7 @@ class _teamboard_detailState extends State<teamboard_detail> {
                             Text(data['userName'] ?? 'unknown'),
                             SizedBox(height: 4),
                             Text(FormatTimestamp(data['timestamp'])),
+                            Text('조회수: ${data['views'] ?? 0}'),
                           ],
                         ),
                       )
@@ -78,21 +107,25 @@ class _teamboard_detailState extends State<teamboard_detail> {
                 ),
               ),
               SizedBox(height: 20),
-              Text(data['title'] ?? '제목 없음', style: TextStyle(fontSize: 25)),
+              Text(data['title'] ?? '제목 없음',
+                  style: TextStyle(fontSize: 25)),
               SizedBox(height: 18),
-              Text(data['content'] ?? '내용 없음', style: TextStyle(fontSize: 15)),
+              Text(data['content'] ?? '내용 없음',
+                  style: TextStyle(fontSize: 15)),
               SizedBox(height: 30),
               Divider(),
-              // 댓글 영역
+
+              // ✅ 댓글 StreamBuilder
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('team_board')
                     .doc(widget.postId)
                     .collection('comments')
-                    .orderBy('timestamp', descending: false)
+                    .orderBy('timestamp')
                     .snapshots(),
                 builder: (context, snapshots) {
-                  if (!snapshots.hasData || snapshots.data!.docs.isEmpty) {
+                  if (!snapshots.hasData ||
+                      snapshots.data!.docs.isEmpty) {
                     return Padding(
                       padding: EdgeInsets.all(15),
                       child: Text('댓글이 없습니다'),
@@ -124,6 +157,7 @@ class _teamboard_detailState extends State<teamboard_detail> {
           );
         },
       ),
+      // ✅ 댓글 입력창 (keyboard 대응 포함)
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -149,16 +183,26 @@ class _teamboard_detailState extends State<teamboard_detail> {
                     );
                     return;
                   }
-    if (FirebaseAuth.instance.currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:
-    Text("로그인 후 댓글을 작성할 수 있습니다")));
-    return;}
+
+                  if (FirebaseAuth.instance.currentUser == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("로그인 후 댓글을 작성할 수 있습니다")),
+                    );
+                    return;
+                  }
+
+                  final user = FirebaseAuth.instance.currentUser!;
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .get();
+                  final userName = userDoc['userName'] ?? '익명';
 
                   final comment = Comments(
                     id: "",
                     content: content,
-                    userId: '임시',
-                    userName: '임시',
+                    userId: user.uid,
+                    userName: userName,
                     timestamp: DateTime.now(),
                   );
 
@@ -168,7 +212,7 @@ class _teamboard_detailState extends State<teamboard_detail> {
                       .collection('comments')
                       .add(comment.toJson());
 
-                  _commentsController.clear(); // 작성 후 초기화
+                  _commentsController.clear();
                 },
                 icon: Icon(Icons.send),
               )

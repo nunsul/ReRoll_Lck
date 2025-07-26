@@ -15,6 +15,7 @@ class free_screen extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: Text('자유게시판'),),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('boards')
@@ -60,7 +61,7 @@ class free_screen extends StatelessWidget{
                         overflow: TextOverflow.ellipsis,
                       ),
                       SizedBox(height: 4,),
-                      Text('${FormatTimestamp(data['timestamp'])}/${data['userName']??'오류'}')
+                      Text('${FormatTimestamp(data['timestamp'])}/${data['userName']??'오류'} / 조회수: ${data['views'] ?? 0}')
                     ],
                   ),
                     onTap:(){

@@ -80,7 +80,7 @@ class Team_Screen extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: 4),
-                          Text('${FormatTimestamp(data['timestamp'])} / ${data['userName'] ?? ''}')
+                          Text('${FormatTimestamp(data['timestamp'])} / ${data['userName'] ?? ''} / 조회수: ${data['views'] ?? 0}')
                         ],
                       ),
                       onTap: () {

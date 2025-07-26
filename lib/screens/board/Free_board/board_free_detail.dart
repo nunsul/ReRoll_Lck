@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled2/models/models_post.dart';
 import 'package:untitled2/widgets/widgets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FreeDetail extends StatefulWidget {
   final String postId;
 
-  const FreeDetail({required this.postId,super.key});
+  const FreeDetail({required this.postId, super.key});
 
   @override
   State<FreeDetail> createState() => _FreeDetailState();
@@ -15,6 +16,14 @@ class FreeDetail extends StatefulWidget {
 
 class _FreeDetailState extends State<FreeDetail> {
   final TextEditingController _commentsController = TextEditingController();
+  late Future<DocumentSnapshot> _postFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _postFuture = _fetchPost();
+    _increaseViewCount(); // ✅ 조회수 증가
+  }
 
   @override
   void dispose() {
@@ -22,15 +31,34 @@ class _FreeDetailState extends State<FreeDetail> {
     super.dispose();
   }
 
+  Future<DocumentSnapshot> _fetchPost() {
+    return FirebaseFirestore.instance
+        .collection('boards')
+        .doc(widget.postId)
+        .get();
+  }
+
+  Future<void> _increaseViewCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = 'viewed_${widget.postId}';
+    final now = DateTime.now();
+    final today = "${now.year}-${now.month}-${now.day}";
+
+    if (prefs.getString(key) != today) {
+      await FirebaseFirestore.instance
+          .collection('boards')
+          .doc(widget.postId)
+          .update({'views': FieldValue.increment(1)});
+      await prefs.setString(key, today);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('자유 게시판')),
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('boards')
-            .doc(widget.postId)
-            .get(),
+        future: _postFuture,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(child: Text('오류'));
@@ -47,7 +75,7 @@ class _FreeDetailState extends State<FreeDetail> {
           return ListView(
             padding: const EdgeInsets.all(25),
             children: [
-              // 게시글 상단 정보 카드
+              // 📌 게시글 정보 카드
               Card(
                 margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 child: Padding(
@@ -58,7 +86,6 @@ class _FreeDetailState extends State<FreeDetail> {
                       Container(
                         width: 60,
                         height: 60,
-                        //나중에 진짜 이미지로 변경 예정
                         color: Colors.grey[500],
                         child: Icon(Icons.image, size: 30),
                       ),
@@ -70,6 +97,8 @@ class _FreeDetailState extends State<FreeDetail> {
                             Text(data['userName'] ?? 'unknown'),
                             SizedBox(height: 4),
                             Text(FormatTimestamp(data['timestamp'])),
+                            SizedBox(height: 4),
+                            Text('조회수: ${data['views'] ?? 0}'),
                           ],
                         ),
                       )
@@ -83,7 +112,8 @@ class _FreeDetailState extends State<FreeDetail> {
               Text(data['content'] ?? '내용 없음', style: TextStyle(fontSize: 15)),
               SizedBox(height: 30),
               Divider(),
-              // 댓글 영역
+
+              // ✅ 댓글 목록
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('boards')
@@ -119,11 +149,12 @@ class _FreeDetailState extends State<FreeDetail> {
                     },
                   );
                 },
-              )
+              ),
             ],
           );
         },
       ),
+      // ✅ 댓글 입력창
       bottomNavigationBar: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -143,11 +174,6 @@ class _FreeDetailState extends State<FreeDetail> {
               IconButton(
                 onPressed: () async {
                   final content = _commentsController.text.trim();
-                  if (FirebaseAuth.instance.currentUser == null) {
-                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:
-                    Text("로그인 후 댓글을 작성할 수 있습니다")));
-                     return;
-                  }
                   if (content.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('내용을 입력하세요!')),
@@ -155,11 +181,26 @@ class _FreeDetailState extends State<FreeDetail> {
                     return;
                   }
 
+                  if (FirebaseAuth.instance.currentUser == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("로그인 후 댓글을 작성할 수 있습니다")),
+                    );
+                    return;
+                  }
+
+                  // userName 받아오기 (임시 제거)
+                  final user = FirebaseAuth.instance.currentUser!;
+                  final userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .get();
+                  final userName = userDoc['userName'] ?? '익명';
+
                   final comment = Comments(
                     id: "",
                     content: content,
-                    userId: '임시',
-                    userName: '임시',
+                    userId: user.uid,
+                    userName: userName,
                     timestamp: DateTime.now(),
                   );
 
@@ -169,7 +210,7 @@ class _FreeDetailState extends State<FreeDetail> {
                       .collection('comments')
                       .add(comment.toJson());
 
-                  _commentsController.clear(); // 작성 후 초기화
+                  _commentsController.clear(); // ✅ 댓글 입력창 초기화
                 },
                 icon: Icon(Icons.send),
               )

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:untitled2/screens/board/Free_board/board_free_screen.dart';
 import 'package:untitled2/screens/board/Team_board/board_teamboard_screen.dart';
 
+import 'main_board_screen.dart';
+
 class BoardMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class BoardMain extends StatelessWidget {
         ),
         body: TabBarView(
           children: [
-            Text('메인'),
+            main_board_screen(),
             free_screen(),
             Team_Screen(),
             Text('갤러리'),
