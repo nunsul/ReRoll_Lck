@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:untitled2/models/models_post.dart';
+import 'package:untitled2/widgets/user_profile_widget.dart';
 import 'package:untitled2/widgets/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,6 +73,7 @@ class _FreeDetailState extends State<FreeDetail> {
 
           final data = snapshot.data!.data() as Map<String, dynamic>;
 
+
           return ListView(
             padding: const EdgeInsets.all(25),
             children: [
@@ -83,11 +85,19 @@ class _FreeDetailState extends State<FreeDetail> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      GestureDetector(
+                        onTap: (){
+                          user_profile_screen(context,
+                              userName: data['userName'] ?? '',
+                              imageUrl: data['imageUrl'] ?? '',
+                              toUserId: data['userUid'] ?? '');
+                          },
+                      child: Container(
                         width: 60,
                         height: 60,
                         color: Colors.grey[500],
                         child: Icon(Icons.image, size: 30),
+                      ),
                       ),
                       SizedBox(width: 12),
                       Expanded(

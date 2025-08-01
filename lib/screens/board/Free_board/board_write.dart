@@ -78,13 +78,18 @@ class _WritePageState extends State<WritePage> {
                       .doc(user.uid)
                       .get();
                   final userName = userDoc['userName'] ?? '익명';
+                  final userId = userDoc['userId'];
+                  final userUid = userDoc.id;
+                  final imageUrl = userDoc['imageUrl'];
 
                   final post = Boards(
                     id: '',
                     title: title,
                     content: content,
                     imageUrls: [],
-                    userId: user.uid,
+                    imageUrl: imageUrl,
+                    userId: userId,
+                    userUid: userUid,
                     userName: userName,
                     timestamp: DateTime.now(),
                   );

@@ -9,7 +9,9 @@ class Boards {
   final String title; //글 제목
   final String content; // 글 내용
   final List<String> imageUrls; // 이미지 url 목록
-  final String userId; //작성자 id
+  final String imageUrl; // 작성자 프로필
+  final String userId;//작성자 id
+  final String userUid;
   final String userName; //작성자 이름
   final DateTime timestamp; // 작성 시간
 
@@ -18,7 +20,9 @@ class Boards {
     required this.title,
     required this.content,
     required this.imageUrls,
+    required this.imageUrl,
     required this.userId,
+    required this.userUid,
     required this.userName,
     required this.timestamp,
   });
@@ -30,7 +34,9 @@ class Boards {
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      imageUrl: json['imageUrl'],
       userId: json['userId'] ?? '',
+      userUid: json['userUid'] ?? '',
       userName: json['userName'] ?? '',
       timestamp: (json['timestamp'] as Timestamp).toDate(),
     );
@@ -41,7 +47,9 @@ class Boards {
       'title': title,
       'content': content,
       'imageUrls': imageUrls,
+      'imageUrl' : imageUrl,
       'userId': userId,
+      'userUid' : userUid,
       'userName': userName,
       'timestamp': timestamp,
     };
@@ -83,15 +91,13 @@ class Comments {
   }
 }
 class users {
-  final String userdocid;
-  final String imageUrls;
+  final String imageUrl;
   final String userName;
   final DateTime timestamp;
   final String userId;
 
   users({
-    required this.userdocid,
-    required this.imageUrls,
+    required this.imageUrl,
     required this.userName,
     required this.timestamp,
     required this.userId,
@@ -99,8 +105,7 @@ class users {
 
   factory users.fromJson(Map<String,dynamic> json,String docId){
     return users(
-        userdocid: docId,
-        imageUrls: json['imageUrls']??'',
+        imageUrl: json['imageUrl']??'',
         userName: json['userName']??'',
         timestamp: (json['timestamp'] as Timestamp).toDate(),
         userId: json['userId']??'',
@@ -109,7 +114,7 @@ class users {
 
   Map<String,dynamic> toJson(){
     return {
-      'imageUrls' : imageUrls,
+      'imageUrl' : imageUrl,
       'userName' : userName,
       'timestamp' : timestamp,
       'userId' : userId,

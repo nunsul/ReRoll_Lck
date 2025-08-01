@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/models/models_post.dart';
+import 'package:untitled2/widgets/user_profile_widget.dart';
 import 'package:untitled2/widgets/widgets.dart';
 
 class teamboard_detail extends StatefulWidget {
@@ -84,12 +85,20 @@ class _teamboard_detailState extends State<teamboard_detail> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
+                      //나중에 그림으로 바꿔야함
+                      GestureDetector(
+                        onTap: (){
+                          user_profile_screen(context,
+                              userName: data['userName'] ?? '',
+                              imageUrl: data['imageUrl'] ?? '',
+                              toUserId: data['userUid'] ?? ''
+                          );
+                        },child: Container(
                         width: 60,
                         height: 60,
                         color: Colors.grey[500],
                         child: Icon(Icons.image, size: 30),
-                      ),
+                      ),),
                       SizedBox(width: 12),
                       Expanded(
                         child: Column(

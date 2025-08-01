@@ -149,8 +149,7 @@ class _signup_screenState extends State<signup_screen> {
                     .collection('users')
                     .doc(uid)
                     .set(users(
-                  userdocid: uid,
-                  imageUrls: photoUrl,
+                  imageUrl: photoUrl,
                   userName: userName,
                   timestamp: DateTime.now(),
                   userId: userId,
