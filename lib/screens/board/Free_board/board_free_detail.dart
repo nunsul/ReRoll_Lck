@@ -6,6 +6,8 @@ import 'package:untitled2/widgets/user_profile_widget.dart';
 import 'package:untitled2/widgets/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../FreeEditScreen.dart';
+
 class FreeDetail extends StatefulWidget {
   final String postId;
 
@@ -57,7 +59,66 @@ class _FreeDetailState extends State<FreeDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('자유 게시판')),
+      appBar: AppBar(title: Text('자유 게시판'),
+      actions: [
+        FutureBuilder(
+          future: _postFuture,
+        builder: (context,snaps){
+          if(!snaps.hasData||!snaps.data!.exists) return SizedBox();
+          final data = snaps.data!.data() as Map<String,dynamic>;
+          final currentUid = FirebaseAuth.instance.currentUser?.uid;
+          final postOwnerUid = data['userUid'];
+          if(currentUid!=postOwnerUid) return SizedBox();
+          return PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),
+              onSelected:(value){
+                if(value == 'edit'){
+                  Navigator.push(context,
+                    MaterialPageRoute(builder: (_)=> FreeEditScreen(postId: widget.postId)),
+                  ).then((result){
+                    if(result == true){
+                      setState(() {
+                        _postFuture = _fetchPost();
+                      });
+                    }
+                  });
+                }else if(value == 'delete'){
+                  showDialog(context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text('정말 삭제할까요?'),
+                        content: Text('삭제하면 복구 할 수 없습니다.'),
+                        actions: [
+                          TextButton(onPressed:()async{
+                            final posts = FirebaseFirestore.instance
+                                .collection('boards')
+                                .doc(widget.postId);
+                            final comment = await posts.collection('comments').get();
+                            for(var doc in comment.docs){
+                              await doc.reference.delete();
+                            }
+                            await posts.delete();
+                            Navigator.pop(context);
+                            Navigator.pop(context,true);
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content:Text('삭제 되었습니다!')));
+                          }, child:Text('삭제')),
+                          TextButton(onPressed: (){
+                            Navigator.pop(context);
+                          }, child: Text('취소'))
+                        ],
+                      )
+                  );
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(value: 'edit',child:Text('✏️수정')),
+                PopupMenuItem(value: 'delete',child:Text('🗑삭제'))
+              ]
+          );
+        }
+        )
+      ],
+      ),
       body: FutureBuilder<DocumentSnapshot>(
         future: _postFuture,
         builder: (context, snapshot) {

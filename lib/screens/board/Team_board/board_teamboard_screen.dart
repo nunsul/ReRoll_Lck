@@ -11,13 +11,26 @@ Future<String> GetSelectedTeam() async {
   return prefs.getString('selectedTeam') ?? '오류';
 }
 
-class Team_Screen extends StatelessWidget {
+class Team_Screen extends StatefulWidget {
   const Team_Screen({super.key});
+
+  @override
+  State<Team_Screen> createState() => _Team_ScreenState();
+}
+
+class _Team_ScreenState extends State<Team_Screen> {
+  late Future<String> _selectedTeamFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTeamFuture = GetSelectedTeam(); // 팀 초기화
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<String>(
-      future: GetSelectedTeam(), // ✅ 선택된 팀 불러오기
+      future: _selectedTeamFuture,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Scaffold(
@@ -35,7 +48,7 @@ class Team_Screen extends StatelessWidget {
           body: StreamBuilder<QuerySnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('team_board')
-                .where('teamName', isEqualTo: selectedTeam) // ✅ 팀 이름 필터링
+                .where('teamName', isEqualTo: selectedTeam)
                 .orderBy('timestamp', descending: true)
                 .snapshots(),
             builder: (context, snapshots) {
@@ -89,7 +102,11 @@ class Team_Screen extends StatelessWidget {
                           MaterialPageRoute(
                             builder: (_) => teamboard_detail(postId: docs[index].id),
                           ),
-                        );
+                        ).then((result) {
+                          if (result == true) {
+                            setState(() {});
+                          }
+                        });
                       },
                     ),
                   );
@@ -102,7 +119,11 @@ class Team_Screen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => teamboard_Write()),
-              );
+              ).then((result) {
+                if (result == true) {
+                  setState(() {}); // ✅ 글 작성 후 새로고침
+                }
+              });
             },
             child: Icon(Icons.add),
           ),

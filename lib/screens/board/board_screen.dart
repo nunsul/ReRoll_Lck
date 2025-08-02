@@ -26,7 +26,7 @@ class BoardMain extends StatelessWidget {
         body: TabBarView(
           children: [
             main_board_screen(),
-            free_screen(),
+            FreeScreen(),
             Team_Screen(),
             Text('갤러리'),
           ],

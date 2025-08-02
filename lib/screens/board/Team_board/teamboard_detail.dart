@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/models/models_post.dart';
+import 'package:untitled2/screens/board/TeamEditScreen.dart';
 import 'package:untitled2/widgets/user_profile_widget.dart';
 import 'package:untitled2/widgets/widgets.dart';
 
@@ -61,7 +62,64 @@ class _teamboard_detailState extends State<teamboard_detail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('팀 게시판')),
+      appBar: AppBar(title: Text('팀 게시판'),actions: [
+        FutureBuilder(
+            future: _postFuture,
+            builder: (context,snaps){
+              if(!snaps.hasData||!snaps.data!.exists) return SizedBox();
+              final data = snaps.data!.data() as Map<String,dynamic>;
+              final currentUid = FirebaseAuth.instance.currentUser?.uid;
+              final postOwnerUid = data['userUid'];
+              if(currentUid!=postOwnerUid) return SizedBox();
+              return PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert),
+                  onSelected:(value){
+                    if(value == 'edit'){
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (_)=> TeamEditScreen(postId: widget.postId)),
+                      ).then((result){
+                        if(result == true){
+                          setState(() {
+                            _postFuture=_fetchPost();
+                          });
+                        }
+                      });
+                    }else if(value == 'delete'){
+                      showDialog(context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('정말 삭제할까요?'),
+                            content: Text('삭제하면 복구 할 수 없습니다.'),
+                            actions: [
+                              TextButton(onPressed:()async{
+                                final posts = FirebaseFirestore.instance
+                                    .collection('team_board')
+                                    .doc(widget.postId);
+                                final comment = await posts.collection('comments').get();
+                                for(var doc in comment.docs){
+                                  doc.reference.delete();
+                                }
+                                await posts.delete();
+                                Navigator.pop(context);
+                                Navigator.pop(context,true);
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    content:Text('삭제 되었습니다!')));
+                              }, child:Text('삭제')),
+                              TextButton(onPressed: (){
+                                Navigator.pop(context,true);
+                              }, child: Text('취소'))
+                            ],
+                          )
+                      );
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(value: 'edit',child:Text('✏️수정')),
+                    PopupMenuItem(value: 'delete',child:Text('🗑삭제'))
+                  ]
+              );
+            }
+        )
+      ],),
       body: FutureBuilder<DocumentSnapshot>(
         future: _postFuture,
         builder: (context, snapshot) {

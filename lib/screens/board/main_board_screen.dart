@@ -16,7 +16,7 @@ class main_board_screen extends StatelessWidget{
       children: [
         TextButton(onPressed: (){
           Navigator.push(context,
-              MaterialPageRoute(builder: (_)=>free_screen()));
+              MaterialPageRoute(builder: (_)=>FreeScreen()));
         }, child: Text("🔥 자유 게시판 HOT", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold))
         ),
         FutureBuilder<QuerySnapshot>(
