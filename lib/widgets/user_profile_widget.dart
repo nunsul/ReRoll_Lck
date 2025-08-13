@@ -11,9 +11,11 @@ void user_profile_screen(BuildContext context,{
   required String userName,
   required String imageUrl,
   required String toUserId,
-}){
+})async{
   final currentUser = FirebaseAuth.instance.currentUser;
-  final fromUserId = currentUser?.uid ?? '';
+  final myId = currentUser?.uid ?? '';
+  final aboutMyId = await FirebaseFirestore.instance.collection('users').doc(myId).get();
+  final myData = aboutMyId.data() ?? {};
   showDialog(
       context: context,
       builder: (context){
@@ -40,17 +42,24 @@ void user_profile_screen(BuildContext context,{
                   mainAxisAlignment:MainAxisAlignment.center,
                   children: [
                     Expanded(child:ElevatedButton(onPressed: ()async{
-                      await sendFriendRequest(fromUserId, toUserId);
+                      await sendFriendRequest(
+                          myId: myId ?? '',
+                          toUserId: toUserId ?? '',
+                          toUserName: userName ?? '',
+                          toUserImageUrl: imageUrl ?? '',
+                          myName: myData['userName'] ??'',
+                          myImageUrl:myData['imageUrl'] ?? '',
+                      );
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('친구 요청을 보냈습니다')));
                     }, child: Text('👤 요청')),),
                     Expanded(child: ElevatedButton(onPressed: (){
-                      /*Navigator.push(context,
-                          MaterialPageRoute(builder: (_)=>chat_message_toUserId()));*/
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (_)=>chat_message_toUserId()));
                     }, child: Text('✉️ 쪽지')),),
-                    Expanded(child: ElevatedButton(onPressed: (){
-                      //차단 기능 추가하기
+                    Expanded(child: ElevatedButton(onPressed: ()async{
+                      friend_block(myId, toUserId);
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content:Text('차단 처리 되었습니다.')));

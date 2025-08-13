@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled2/models/models_post.dart';
-import 'package:untitled2/screens/board/TeamEditScreen.dart';
+import 'package:untitled2/screens/board/Team_board/TeamEditScreen.dart';
 import 'package:untitled2/widgets/user_profile_widget.dart';
 import 'package:untitled2/widgets/widgets.dart';
 

@@ -61,6 +61,10 @@ class _RerollMainScreenState extends State<RerollMainScreen>{
       bottomNavigationBar: BottomNavigationBar(
         currentIndex:selectedIndex,
       onTap: (int index){
+          if(index == 3 && FirebaseAuth.instance.currentUser==null){
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content:Text('채팅은 로그인이 필요합니다!') ));
+            return;
+          }
         setState(() {
           selectedIndex = index;
         });
