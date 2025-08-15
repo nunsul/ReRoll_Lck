@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:untitled2/widgets/chat_note.dart';
 import 'package:untitled2/widgets/chat_widgets.dart';
 
 import '../chat/chat_message_toUserId.dart';
@@ -55,8 +56,7 @@ void user_profile_screen(BuildContext context,{
                           content: Text('친구 요청을 보냈습니다')));
                     }, child: Text('👤 요청')),),
                     Expanded(child: ElevatedButton(onPressed: (){
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (_)=>chat_message_toUserId()));
+                      chat_note(context, otherUid: toUserId, userName: userName);
                     }, child: Text('✉️ 쪽지')),),
                     Expanded(child: ElevatedButton(onPressed: ()async{
                       friend_block(myId, toUserId);
